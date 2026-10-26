@@ -98,6 +98,9 @@ func ValidateRPC(tool string, nodeIDs []string, params map[string]interface{}) s
 		}
 
 	case "get_design_context":
+		if id, ok := params["nodeId"].(string); ok && !ValidNodeID(id) {
+			return fmt.Sprintf("invalid nodeId: %s — must use colon format e.g. 4029:12345", id)
+		}
 		if depth, ok := params["depth"].(float64); ok {
 			if depth < 0 {
 				return "depth must be a non-negative number"

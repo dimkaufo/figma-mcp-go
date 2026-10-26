@@ -201,12 +201,18 @@ export const handleReadDocumentRequest = async (request: any) => {
       };
 
       const selection = figma.currentPage.selection;
-      const rawContextNodes =
-        selection.length > 0
-          ? await Promise.all(
-              selection.map((node) => serializeWithDepth(node, 0)),
-            )
-          : [await serializeWithDepth(figma.currentPage, 0)];
+      const rootId = request.params && request.params.nodeId;
+      let rawContextNodes: any[];
+      if (rootId) {
+        const root = await figma.getNodeByIdAsync(rootId);
+        if (!root || root.type === "DOCUMENT") throw new Error(`Node not found: ${rootId}`);
+        rawContextNodes = [await serializeWithDepth(root, 0)];
+      } else {
+        rawContextNodes =
+          selection.length > 0
+            ? await Promise.all(selection.map((node) => serializeWithDepth(node, 0)))
+            : [await serializeWithDepth(figma.currentPage, 0)];
+      }
       const { tree: dedupedNodes, globalVars } = deduplicateStyles({ children: rawContextNodes });
       const contextNodes = (dedupedNodes as any).children;
       return {

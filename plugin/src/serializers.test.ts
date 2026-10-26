@@ -245,8 +245,8 @@ describe("serializeLineHeight", () => {
   it("returns 'mixed' for symbol", () => {
     expect(serializeLineHeight(Symbol())).toBe("mixed");
   });
-  it("returns undefined for AUTO unit", () => {
-    expect(serializeLineHeight({ unit: "AUTO" })).toBeUndefined();
+  it("keeps AUTO explicit", () => {
+    expect(serializeLineHeight({ unit: "AUTO" })).toEqual({ unit: "AUTO" });
   });
   it("returns undefined for null/falsy", () => {
     expect(serializeLineHeight(null)).toBeUndefined();
@@ -266,8 +266,8 @@ describe("serializeLetterSpacing", () => {
   it("returns 'mixed' for symbol", () => {
     expect(serializeLetterSpacing(Symbol())).toBe("mixed");
   });
-  it("returns undefined when value is 0", () => {
-    expect(serializeLetterSpacing({ value: 0, unit: "PIXELS" })).toBeUndefined();
+  it("keeps zero spacing explicit", () => {
+    expect(serializeLetterSpacing({ value: 0, unit: "PIXELS" })).toEqual({ value: 0, unit: "PIXELS" });
   });
   it("returns undefined for null/falsy", () => {
     expect(serializeLetterSpacing(null)).toBeUndefined();
@@ -555,6 +555,25 @@ describe("serializeText", () => {
     expect(result.styles.fontFamily).toBe("Inter");
     expect(result.styles.fontStyle).toBe("Regular");
     expect(result.characters).toBe("hello");
+  });
+
+  it("exports default text params explicitly (AUTO line height, 0 spacing, text case)", async () => {
+    const node = {
+      fontName: { family: "Inter", style: "Regular" },
+      fontSize: 14,
+      fontWeight: 400,
+      textDecoration: "NONE",
+      lineHeight: { unit: "AUTO" },
+      letterSpacing: { value: 0, unit: "PIXELS" },
+      textCase: "ORIGINAL",
+      textAlignHorizontal: "LEFT",
+      characters: "hello",
+    };
+    const result = await serializeText(node, makeBase());
+    expect(result.styles.lineHeight).toEqual({ unit: "AUTO" });
+    expect(result.styles.letterSpacing).toEqual({ value: 0, unit: "PIXELS" });
+    expect(result.styles.textCase).toBe("ORIGINAL");
+    expect((await serializeText({ ...node, textCase: Symbol() }, makeBase())).styles.textCase).toBe("mixed");
   });
 
   it("includes textStyle when textStyleId resolves", async () => {

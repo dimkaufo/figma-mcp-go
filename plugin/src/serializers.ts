@@ -137,7 +137,9 @@ export const serializeStyles = async (node: any) => {
 export const serializeLineHeight = (lineHeight: any) => {
   if (isMixed(lineHeight)) return "mixed";
 
-  if (!lineHeight || lineHeight.unit === "AUTO") return undefined;
+  if (!lineHeight) return undefined;
+  // AUTO stays explicit: consumers must tell "auto" from "not exported".
+  if (lineHeight.unit === "AUTO") return { unit: "AUTO" };
 
   return { value: lineHeight.value, unit: lineHeight.unit };
 };
@@ -145,7 +147,7 @@ export const serializeLineHeight = (lineHeight: any) => {
 export const serializeLetterSpacing = (letterSpacing: any) => {
   if (isMixed(letterSpacing)) return "mixed";
 
-  if (!letterSpacing || letterSpacing.value === 0) return undefined;
+  if (!letterSpacing) return undefined;
 
   return { value: letterSpacing.value, unit: letterSpacing.unit };
 };
@@ -193,6 +195,7 @@ export const serializeText = async (node: any, base: any) => {
           : undefined,
       lineHeight: serializeLineHeight(node.lineHeight),
       letterSpacing: serializeLetterSpacing(node.letterSpacing),
+      textCase: isMixed(node.textCase) ? "mixed" : node.textCase,
       textAlignHorizontal: isMixed(node.textAlignHorizontal)
         ? "mixed"
         : node.textAlignHorizontal,

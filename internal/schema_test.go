@@ -152,6 +152,13 @@ func TestValidateRPC_GetDesignContext(t *testing.T) {
 	if msg == "" {
 		t.Error("expected error for invalid detail")
 	}
+	// nodeId must be colon format
+	if msg := ValidateRPC("get_design_context", nil, map[string]interface{}{"nodeId": "14921-44834"}); msg == "" {
+		t.Error("expected error for hyphenated nodeId")
+	}
+	if msg := ValidateRPC("get_design_context", nil, map[string]interface{}{"nodeId": "14921:44834"}); msg != "" {
+		t.Errorf("unexpected error for valid nodeId: %s", msg)
+	}
 	// valid detail values
 	for _, d := range []string{"minimal", "compact", "full"} {
 		msg := ValidateRPC("get_design_context", nil, map[string]interface{}{"detail": d})

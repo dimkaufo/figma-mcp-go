@@ -99,6 +99,8 @@ func TestHandlers_GetDesignContext(t *testing.T) {
 	callTool(t, s, "get_design_context", nil)
 	// depth = 0 should be ignored (not passed through)
 	callTool(t, s, "get_design_context", map[string]any{"depth": float64(0)})
+	// scoped to a node instead of the selection
+	callTool(t, s, "get_design_context", map[string]any{"nodeId": "14921:44834"})
 }
 
 func TestHandlers_SearchNodes(t *testing.T) {

@@ -51,12 +51,15 @@ func registerReadDocumentTools(s *server.MCPServer, node *Node) {
 	})
 
 	s.AddTool(mcp.NewTool("get_design_context",
-		mcp.WithDescription("Get a depth-limited, token-efficient tree of the current selection or page. Use this instead of get_document when exploring large files. Supports detail levels (minimal/compact/full) and dedupe_components for pages heavy with repeated component instances."),
+		mcp.WithDescription("Get a depth-limited, token-efficient tree of a node (nodeId), else the current selection, else the page. Use this instead of get_document when exploring large files. Supports detail levels (minimal/compact/full) and dedupe_components for pages heavy with repeated component instances."),
 		mcp.WithNumber("depth",
 			mcp.Description("How many levels deep to traverse (default 2)"),
 		),
 		mcp.WithString("detail",
 			mcp.Description("Property verbosity: minimal (id/name/type/bounds only), compact (+fills/strokes/opacity), full (everything, default)"),
+		),
+		mcp.WithString("nodeId",
+			mcp.Description("Root node in colon format e.g. '4029:12345' (default: current selection, else page)"),
 		),
 		mcp.WithBoolean("dedupe_components",
 			mcp.Description("When true, INSTANCE nodes are serialized compactly (mainComponentId + componentProperties + overrides array of differing text/nested content) and unique component definitions are collected once in a top-level componentDefs map. Highly token-efficient for screens with many repeated component instances."),
@@ -68,6 +71,9 @@ func registerReadDocumentTools(s *server.MCPServer, node *Node) {
 		}
 		if det, ok := req.GetArguments()["detail"].(string); ok && det != "" {
 			params["detail"] = det
+		}
+		if id, ok := req.GetArguments()["nodeId"].(string); ok && id != "" {
+			params["nodeId"] = id
 		}
 		if dd, ok := req.GetArguments()["dedupe_components"].(bool); ok && dd {
 			params["dedupeComponents"] = true
